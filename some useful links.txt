@@ -1,0 +1,35 @@
+https://www.notion.so/Wheat-Crop-Classification-8ab4a325cb56451d9fdbd155806dbd35?pvs=4
+
+https://esaharyana.gov.in/state-statistical-abstract-of-haryana/
+https://www.timeanddate.com/weather/india/jalandhar/historic?month=4&year=2020
+https://www.youtube.com/watch?v=3BHVlaRMsYY
+https://kaggle.com/datasets/imdevskp/india-district-wise-shape-files?resource=download&select=output.shp 
+
+
+var dt=table.filter(ee.Filter.eq('distname','Amritsar'));
+Map.addLayer(dt);
+Map.centerObject(dt,10);
+var s2 = ee.ImageCollection("COPERNICUS/S2_HARMONIZED")
+var image = s2.filterBounds(dt)
+            .filterMetadata('CLOUDY_PIXEL_PERCENTAGE','less_than',1)
+            .filterDate('2016-10-01','2017-04-30')
+            .median()
+            .clip(dt)
+
+//Map.addLayer(image)
+         
+Map.addLayer(image,imageVisParam,'True Color');      
+
+var NDVI = image.normalizedDifference(['B8','B4'])
+
+Map.addLayer(NDVI,{min:-1,max:0.7,palette:['blue','white','green']})
+
+var average=NDVI.reduceRegion({
+  reducer:ee.Reducer.mean(),
+  geometry:dt,
+  scale:10,
+  maxPixels:1e13
+});
+
+
+print(average);
